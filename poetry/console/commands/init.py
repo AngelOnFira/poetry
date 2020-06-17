@@ -213,6 +213,10 @@ The <c1>init</c1> command creates a basic <comment>pyproject.toml</> file in the
             )
             while package is not None:
                 constraint = self._parse_requirements([package])[0]
+
+                if constraint == None:
+                    continue
+
                 if (
                     "git" in constraint
                     or "url" in constraint
@@ -225,6 +229,8 @@ The <c1>init</c1> command creates a basic <comment>pyproject.toml</> file in the
                     continue
 
                 matches = self._get_pool().search(constraint["name"])
+                print("adsfasdf")
+                print(matches)
 
                 if not matches:
                     self.line("<error>Unable to find package</error>")
@@ -421,9 +427,19 @@ The <c1>init</c1> command creates a basic <comment>pyproject.toml</> file in the
             )
             pair = pair.strip()
 
+
             require = OrderedDict()
             if " " in pair:
-                name, version = pair.split(" ", 2)
+                try:
+                    name, version = pair.split(" ", 2)
+                except ValueError as e:
+                    self.line(
+                        "Cannot parse depencency"
+                    )
+                    return [None]
+
+                print(name, version)
+
                 extras_m = re.search(r"\[([\w\d,-_]+)\]$", name)
                 if extras_m:
                     extras = [e.strip() for e in extras_m.group(1).split(",")]
@@ -457,7 +473,6 @@ The <c1>init</c1> command creates a basic <comment>pyproject.toml</> file in the
                 require["extras"] = extras
 
             result.append(require)
-
         return result
 
     def _format_requirements(
